@@ -1,0 +1,8 @@
+aiohttp
+pandas
+numpy
+rich
+pyfiglet
+blessed
+
+
