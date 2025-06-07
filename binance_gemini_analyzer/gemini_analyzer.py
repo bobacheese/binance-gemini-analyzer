@@ -1,64 +1,108 @@
 import aiohttp
 import json
 from rich.console import Console
+from trading_signals import signal_engine
+import pandas as pd
 
 console = Console()
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
 
 async def analyze_with_gemini(data, api_key, symbol, timeframe):
+    """Analisis menggunakan Gemini AI dengan data yang diperkaya"""
+    console.log("[cyan]🤖 Memulai analisis AI dengan Gemini...[/cyan]")
+
+    # Convert data to DataFrame for signal analysis
+    df = pd.DataFrame(data)
+
+    # Generate advanced trading signals
+    trading_recommendation = signal_engine.generate_trading_recommendation(df, symbol, timeframe)
+
     headers = {
         "Content-Type": "application/json"
     }
-    
-    #prompt
+
+    # Enhanced prompt with advanced analysis
+    latest_data = data[-1] if data else {}
+    previous_data = data[-2] if len(data) > 1 else {}
+
     prompt = f"""
-    Analisis data trading berikut untuk {symbol} pada timeframe {timeframe}:
+    ANALISIS TRADING CRYPTOCURRENCY ADVANCED - {symbol} ({timeframe})
 
-    Data terakhir:
-    {json.dumps(data[-1], indent=2)}
+    🔍 DATA TEKNIKAL TERKINI:
+    Current Price: ${latest_data.get('close', 'N/A')}
+    RSI: {latest_data.get('RSI', 'N/A')}
+    MACD: {latest_data.get('MACD', 'N/A')}
+    Signal Score: {latest_data.get('Signal_Score', 'N/A')}
+    Recommendation: {latest_data.get('Recommendation', 'N/A')}
 
-    Data sebelumnya:
-    {json.dumps(data[-2], indent=2)}
+    🤖 MACHINE LEARNING ANALYSIS:
+    ML Signal: {trading_recommendation.get('ml_signal', 'N/A')}
+    ML Confidence: {trading_recommendation.get('ml_confidence', 'N/A')}%
+    Technical Score: {trading_recommendation.get('technical_score', 'N/A')}
 
-    Berikan analisis mendalam dan rekomendasi trading dengan format berikut:
+    📊 ADVANCED INDICATORS:
+    ADX: {latest_data.get('ADX', 'N/A')}
+    Williams %R: {latest_data.get('Williams_R', 'N/A')}
+    CCI: {latest_data.get('CCI', 'N/A')}
+    Trend Strength: {latest_data.get('Trend_Strength', 'N/A')}
 
-    1. Analisis Tren Harga:
-       - Tren jangka pendek:
-       - Tren jangka menengah:
-       - Support dan resistance terdekat:
+    🎯 TRADING RECOMMENDATION SYSTEM:
+    Action: {trading_recommendation.get('action', 'N/A')}
+    Confidence: {trading_recommendation.get('confidence', 'N/A')}%
+    Entry Price: ${trading_recommendation.get('entry_price', 'N/A')}
+    Stop Loss: ${trading_recommendation.get('stop_loss', 'N/A')}
+    Take Profit 1: ${trading_recommendation.get('take_profit_1', 'N/A')}
+    Take Profit 2: ${trading_recommendation.get('take_profit_2', 'N/A')}
+    Risk/Reward: {trading_recommendation.get('risk_reward_ratio', 'N/A')}
 
-    2. Analisis Indikator Teknikal:
-       - MACD:
-       - RSI:
-       - Bollinger Bands:
-       - Stochastic Oscillator:
-       - Moving Averages:
+    📈 SUPPORT/RESISTANCE:
+    Support: ${trading_recommendation.get('support', 'N/A')}
+    Resistance: ${trading_recommendation.get('resistance', 'N/A')}
 
-    3. Rekomendasi Trading:
-       - Posisi: [Beli/Jual/Hold]
-       - Entry Price:
-       - Take Profit 1:
-       - Take Profit 2:
-       - Stop Loss:
-       - Risk/Reward Ratio:
+    ⚡ VOLATILITY & RISK:
+    Volatility: {trading_recommendation.get('volatility', 'N/A')}%
+    ATR%: {trading_recommendation.get('atr_percent', 'N/A')}%
 
-    4. Tingkat Keyakinan Analisis: [dari 0 sampai 100%]
+    🔥 CANDLESTICK PATTERNS:
+    Doji: {latest_data.get('Doji', False)}
+    Hammer: {latest_data.get('Hammer', False)}
+    Shooting Star: {latest_data.get('Shooting_Star', False)}
+    Bullish Engulfing: {latest_data.get('Bullish_Engulfing', False)}
+    Bearish Engulfing: {latest_data.get('Bearish_Engulfing', False)}
 
-    5. Alasan Rekomendasi:
-       [Jelaskan alasan di balik rekomendasi trading]
+    Berdasarkan analisis teknikal advanced dan machine learning di atas, berikan analisis mendalam dengan format:
 
-    6. Faktor Penting Lainnya:
-       - Volatilitas:
-       - Volume:
-       - Sentimen Pasar:
+    🎯 EXECUTIVE SUMMARY:
+    [Ringkasan singkat kondisi pasar dan rekomendasi utama]
 
-    7. Manajemen Risiko:
-       [Berikan saran manajemen risiko]
+    📊 ANALISIS TEKNIKAL MENDALAM:
+    1. Trend Analysis: [Analisis trend multi-timeframe]
+    2. Momentum Indicators: [RSI, MACD, Stochastic analysis]
+    3. Volatility Analysis: [Bollinger Bands, ATR analysis]
+    4. Volume Analysis: [Volume patterns dan VWAP]
+    5. Advanced Indicators: [ADX, CCI, Williams %R]
 
-    8. Timeframe yang Disarankan:
-       [Berikan saran timeframe terbaik untuk trade ini]
+    🤖 MACHINE LEARNING INSIGHTS:
+    [Interpretasi hasil ML dan confidence level]
 
-    Berikan analisis yang objektif dan informatif berdasarkan data yang tersedia.
+    🎯 TRADING STRATEGY:
+    - Entry Strategy: [Kapan dan bagaimana masuk]
+    - Exit Strategy: [Target profit dan stop loss]
+    - Position Sizing: [Berapa % portfolio untuk trade ini]
+    - Risk Management: [Strategi manajemen risiko]
+
+    ⚠️ RISK ASSESSMENT:
+    - Risk Level: [Low/Medium/High]
+    - Key Risks: [Faktor risiko utama]
+    - Market Conditions: [Kondisi pasar saat ini]
+
+    🔮 MARKET OUTLOOK:
+    [Prediksi pergerakan harga jangka pendek dan menengah]
+
+    💡 TRADING TIPS:
+    [Tips praktis untuk eksekusi trading]
+
+    Berikan analisis yang objektif, data-driven, dan actionable!
     """
     
     payload = {
